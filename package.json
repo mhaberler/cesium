@@ -131,5 +131,8 @@
     "prettier": "prettier --write \"**/*\"",
     "prettier-check": "prettier --check \"**/*\"",
     "pretty-quick": "pretty-quick"
+  },
+  "dependencies": {
+    "gpx2czml": "^1.0.6"
   }
 }
