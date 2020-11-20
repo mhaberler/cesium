@@ -33,6 +33,14 @@
     <div id="toolbar"></div>
 
     <script id="cesium_sandcastle_script">
+      Sandcastle.addToolbarButton("Toggle Boxes", function () {
+        console.log("Toggle Boxes");
+      });
+
+      Sandcastle.addToolbarButton("Toggle Ellipsoids", function () {
+        console.log("Toggle Ellipsoids");
+      });
+
       var altDisplay = document.createElement("div");
       var gndDisplay = document.createElement("div");
 
@@ -64,14 +72,43 @@
 
         // Construct the default list of terrain sources.
         // https://stackoverflow.com/questions/28291013/get-ground-altitude-cesiumjs
-        var terrainModels = Cesium.createDefaultTerrainProviderViewModels();
+        //var terrainModels = Cesium.createDefaultTerrainProviderViewModels();
 
         var viewer = new Cesium.Viewer("cesiumContainer", {
-          terrainProviderViewModels: terrainModels,
-          selectedTerrainProviderViewModel: terrainModels[1], // Select STK High-res terrain
-          //      terrainProvider: Cesium.createWorldTerrain(),
+          //terrainProviderViewModels: terrainModels,
+          //selectedTerrainProviderViewModel: terrainModels[1], // Select STK High-res terrain
+          terrainProvider: Cesium.createWorldTerrain(),
           baseLayerPicker: true,
-          shouldAnimate: true,
+          shouldAnimate: false, //true, //
+          vrButton: true,
+          // Click the VR button in the bottom right of the screen to switch to VR mode.
+
+          // scene3DOnly: true,
+          //  baseLayerPicker: true,
+          // imageryProvider: new Cesium.UrlTemplateImageryProvider({
+          //   url: defaultBaseMapLayer.layerUrl,
+          //   maximumLevel: defaultBaseMapLayer.maxZoom,
+          //   credit: defaultBaseMapLayer.attribution
+          // }),
+          animation: true, // true: use Cesium.Animation control widget
+          fullscreenButton: true,
+          geocoder: false,
+          homeButton: false,
+          infoBox: true,
+          sceneModePicker: true,
+          selectionIndicator: true,
+          timeline: true,
+          navigationHelpButton: true,
+          navigationInstructionsInitiallyVisible: false,
+          //scene3DOnly: true,
+          automaticallyTrackDataSourceClocks: true,
+          // creditContainer: 'creditContainer'
+          // vrButton: true,
+          //    homeButton: false,
+          //    infoBox: false,
+          // navigationInstructionsInitiallyVisible: false, //true,
+          //      sceneMode: Cesium.SceneMode.SCENE3D, // Cesium.SceneMode.SCENE2D,
+          //  globe: false
         });
 
         if (params.inspector) {
@@ -85,24 +122,11 @@
           console.log(error);
           window.alert(error);
         });
-        var path = null;
 
-        // From https://stackoverflow.com/a/11172685/1278023
-        function measure(lat1, lon1, lat2, lon2) {
-          // generally used geo measurement function
-          var R = 6378.137; // Radius of earth in KM
-          var dLat = lat2 - lat1;
-          var dLon = lon2 - lon1;
-          var a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos((lat1 * Math.PI) / 180) *
-              Math.cos((lat2 * Math.PI) / 180) *
-              Math.sin(dLon / 2) *
-              Math.sin(dLon / 2);
-          var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          var d = R * c;
-          return d * 1000; // meters
-        }
+        // https://sandcastle.cesium.com/index.html?src=Time%20Dynamic%20Wheels.html&label=All
+        var velocityVector = new Cesium.Cartesian3();
+
+        var path = null;
 
         function trackEntity(clock) {
           if (viewer.selectedEntity) {
@@ -118,8 +142,6 @@
                 Cesium.Ellipsoid.WGS84,
                 scratchCartographic
               );
-
-              // Finally, convert from radians to degrees.
               gndDisplay.innerHTML =
                 viewer.selectedEntity.name +
                 ": " +
@@ -131,7 +153,14 @@
 
         viewer.selectedEntityChanged.addEventListener(function (entity) {
           if (entity) {
+            // https://sandcastle.cesium.com/index.html?src=Time%20Dynamic%20Wheels.html&label=All
+            // A velocity vector property will give us the entity's speed and direction at any given time.
+            var velocityVectorProperty = new Cesium.VelocityVectorProperty(
+              entity.position,
+              false
+            );
             viewer.clock.onTick.addEventListener(trackEntity);
+
             console.log(entity.name);
           } else {
             viewer.clock.onTick.removeEventListener(trackEntity);
@@ -156,7 +185,34 @@
           collection,
           datasource
         ) {
-          sourceAdded(datasource);
+          //sourceAdded(datasource);
+          viewer.trackedEntity = datasource.entities.getById("aircraft");
+          viewer.selectedEntity = viewer.trackedEntity;
+          viewer.zoomTo(
+            viewer.trackedEntity,
+            new Cesium.HeadingPitchRange(Math.PI / 2, -Math.PI / 4, 400)
+          );
+          //viewer.flyTo(datasource);
+          //viewer.trackedEntity.viewFrom = new Cesium.Cartesian3(0, -750, 200);
+          //viewer.camera.zoomOut(1000);
+          console.log(viewer.trackedEntity);
+        });
+
+        Sandcastle.addToolbarButton("zoomTo", function () {
+          viewer.zoomTo(
+            viewer.trackedEntity,
+            new Cesium.HeadingPitchRange(Math.PI / 2, -Math.PI / 4, 400)
+          );
+        });
+
+        Sandcastle.addToolbarButton("flyTo", function () {
+          viewer.flyTo(viewer.trackedEntity, {
+            offset: new Cesium.HeadingPitchRange(
+              Math.PI / 2,
+              -Math.PI / 4,
+              400
+            ),
+          });
         });
 
         viewer.clock.onTick.addEventListener(function (clock) {
@@ -204,6 +260,7 @@
 
         //Enabling lighting depending on time of day
         viewer.scene.globe.enableLighting = true;
+        viewer.scene.globe.depthTestAgainstTerrain = true;
 
         // Pre-allocate some memory, so we don't re-allocate 30~60 times per second.
         var scratchCartesian = new Cesium.Cartesian3();
@@ -262,14 +319,6 @@
         gndDisplay.style.padding = "5px 10px";
         gndDisplay.style.marginTop = "5px";
         document.getElementById("toolbar").appendChild(gndDisplay);
-
-        Sandcastle.addToolbarButton("Toggle Boxes", function () {
-          console.log("Toggle Boxes");
-        });
-
-        Sandcastle.addToolbarButton("Toggle Ellipsoids", function () {
-          console.log("Toggle Ellipsoids");
-        });
 
         //Sandcastle_End
         Sandcastle.finishedLoading();
