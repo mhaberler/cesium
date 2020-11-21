@@ -1,6 +1,7 @@
 window.CESIUM_BASE_URL = "../../Source/";
 
 import {
+  Ion,
   Cartesian3,
   createWorldTerrain,
   defined,
@@ -37,6 +38,10 @@ function main() {
                            [height,heading,pitch,roll] default is looking straight down, [300,0,-90,0]
        saveCamera=false    Don't automatically update the camera view in the URL when it changes.
      */
+
+  Ion.defaultAccessToken =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
+
   var endUserOptions = queryToObject(window.location.search.substring(1));
 
   var imageryProvider;
@@ -55,6 +60,9 @@ function main() {
       baseLayerPicker: hasBaseLayerPicker,
       scene3DOnly: endUserOptions.scene3DOnly,
       requestRenderMode: true,
+      geocoder: false,
+      homeButton: false,
+      vrButton: true,
     });
 
     if (hasBaseLayerPicker) {
@@ -210,6 +218,7 @@ function main() {
   }
 
   var camera = viewer.camera;
+
   function saveCamera() {
     var position = camera.positionCartographic;
     var hpr = "";
