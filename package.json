@@ -99,8 +99,8 @@
   },
   "scripts": {
     "convertToModules": "gulp convertToModules",
-    "start": "node  server.js --port 8081",
-    "startPublic": "node server.js --port 8081 --public",
+    "start": "node  server.cjs --port 8081",
+    "startPublic": "node server.cjs --port 8081 --public",
     "build": "gulp build",
     "build-watch": "gulp build-watch",
     "build-ts": "gulp build-ts",
