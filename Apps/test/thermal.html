@@ -38,6 +38,36 @@
         //Sandcastle_Begin
         var viewer = new Cesium.Viewer("cesiumContainer");
 
+        atprovider = new Cesium.ProviderViewModel({
+          name: "Austrian\u00adOpenGovernmentData\u00adBasemap",
+          iconUrl:
+            "http://www.geoland.at/assets/images/IndexGrid/basemap_hover_en.png",
+          tooltip:
+            "Austrian OGD Basemap.\nhttps://www.basemap.at/index_en.html",
+          creationFunction: function () {
+            /** www.basemap.at/wmts/1.0.0/WMTSCapabilities.xml
+             * WMTS Server:	https://maps.wien.gv.at/basemap
+             * maximumLevel 1:533 = 20,
+             * Layer name:	geolandbasemap
+             * "Geoland Basemap" default base map, , image/png
+             * Layer name:	bmapgrau
+             * "Geoland Basemap Grau" includes topographic contours, image/png
+             * Layer name:	bmaporthofoto30cm
+             * "Geoland Basemap Orthofoto" = orthophoto base map, image/jpeg
+             * Layer name:	bmapoverlay
+             * "Geoland Basemap Overlay" = labels, image/png	*/
+            return new Cesium.WebMapTileServiceImageryProvider({
+              url:
+                "https://maps.wien.gv.at/basemap/geolandbasemap/normal/google3857/{TileMatrix}/{TileRow}/{TileCol}.png",
+              layer: "bmapgrau",
+              style: "normal",
+              format: "image/png",
+              tileMatrixSetID: "google3857",
+              maximumLevel: 20,
+              credit: new Cesium.Credit({ text: "Basemap.AT" }),
+            });
+          },
+        });
         // Add a WMTS imagery layer.
         // This comes from thermal.kk7.ch - Michael v Känel's service
         var provider = new Cesium.WebMapTileServiceImageryProvider({
@@ -52,10 +82,13 @@
           format: "image/png",
         });
         var imageryLayers = viewer.imageryLayers;
-        var layer = imageryLayers.addImageryProvider(provider);
+
+        //    var layer = imageryLayers.addImageryProvider(provider);
+        var layer = imageryLayers.addImageryProvider(atprovider);
+
         provider.readyPromise.then(function () {
           //debugger;
-
+          console.log("thermal layer loaded");
           // Make the weather layer semi-transparent to see the underlying geography.
           layer.alpha = 1.0;
         }); //Sandcastle_End
