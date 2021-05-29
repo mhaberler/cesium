@@ -46,10 +46,30 @@ var czml = [
       step: "SYSTEM_CLOCK_MULTIPLIER",
     },
   },
+  // geht auch
+  // {
+  //     id: "foo_values",
+  //     parent: "track0",
+  //     name: "An object with custom properties",
+  //     temperature: {
+  //         epoch: "2021-05-24T04:21:32Z",
+  //         interpolationAlgorithm: "LINEAR",
+  //         // "interpolationDegree": 3,
+  //         number: [
+  //             // seconds offset from epoch, value
+  //                 0.0,
+  //             42,
+  //             840.0,
+  //             77,
+  //             2035.0,
+  //             59.0,
+  //         ],
+  //     },
+  // },
   {
     id: "track0:sensor_values",
-    name: "An object with custom properties",
-    show: false,
+    // parent: "track0",
+    name: "flight data sampled",
     properties: {
       //  constant_property: true,
       burner_intervals: [
@@ -173,7 +193,7 @@ var czml = [
       ],
     },
     model: {
-      gltf: "https://static.mah.priv.at/cors/OE-SOX.glb",
+      gltf: "https://static.mah.priv.at/cors/D-OTNI.glb",
       scale: 1.0,
       minimumPixelSize: 64,
     },
@@ -613,6 +633,7 @@ function main() {
         viewer.selectedEntity.position,
         false
       );
+      console.log("select:", viewer.selectedEntity.id, viewer.selectedEntity);
     }
   }, ScreenSpaceEventType.LEFT_CLICK);
 
