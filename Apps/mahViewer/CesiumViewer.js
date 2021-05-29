@@ -46,30 +46,12 @@ var czml = [
       step: "SYSTEM_CLOCK_MULTIPLIER",
     },
   },
-  // geht auch
-  // {
-  //     id: "foo_values",
-  //     parent: "track0",
-  //     name: "An object with custom properties",
-  //     temperature: {
-  //         epoch: "2021-05-24T04:21:32Z",
-  //         interpolationAlgorithm: "LINEAR",
-  //         // "interpolationDegree": 3,
-  //         number: [
-  //             // seconds offset from epoch, value
-  //                 0.0,
-  //             42,
-  //             840.0,
-  //             77,
-  //             2035.0,
-  //             59.0,
-  //         ],
-  //     },
-  // },
+
   {
-    id: "track0:sensor_values",
-    // parent: "track0",
-    name: "flight data sampled",
+    id: "track0",
+    name: "track visualisation",
+    description: "description",
+    availability: "2021-05-24T04:21:32Z/2021-05-24T04:55:27Z",
     properties: {
       //  constant_property: true,
       burner_intervals: [
@@ -95,7 +77,7 @@ var czml = [
           0.0,
           42,
           840.0,
-          77,
+          104,
           2035.0,
           59.0,
         ],
@@ -119,12 +101,6 @@ var czml = [
         ],
       },
     },
-  },
-  {
-    id: "track0",
-    name: "track visualisation",
-    description: "description",
-    availability: "2021-05-24T04:21:32Z/2021-05-24T04:55:27Z",
     position: {
       epoch: "2021-05-24T04:21:32Z",
       interpolationAlgorithm: "LAGRANGE",
@@ -221,6 +197,7 @@ var flightOrientation;
 var compass;
 var speed;
 var temperature;
+var altitude;
 var velocityVectorProperty;
 var velocityVector = new Cartesian3();
 
@@ -535,6 +512,35 @@ function main() {
     animateOnInit: true,
   }).draw();
 
+  altitude = new LinearGauge({
+    renderTo: "altitude",
+    width: 200,
+    height: 60,
+    minValue: 0,
+    maxValue: 2000,
+    majorTicks: ["0", "500", "1000", "1500", "2000"],
+    minorTicks: 5,
+    strokeTicks: true,
+    colorPlate: "#fff",
+    borderShadowWidth: 0,
+    borders: false,
+    barBeginCircle: false,
+    tickSide: "left",
+    numberSide: "left",
+    needleSide: "left",
+    needleType: "line",
+    needleWidth: 3,
+    colorNeedle: "#222",
+    colorNeedleEnd: "#222",
+    animationDuration: 1500,
+    animationRule: "linear",
+    animationTarget: "plate",
+    barWidth: 5,
+    title: "Altitude m",
+    ticksWidth: 50,
+    ticksWidthMinor: 15,
+  }).draw();
+
   speed = new LinearGauge({
     renderTo: "speed",
     width: 200,
@@ -644,9 +650,9 @@ function main() {
       );
       const carto = Cartographic.fromCartesian(position);
 
-      const lat = Math.toDegrees(carto.latitude);
-      const lon = Math.toDegrees(carto.longitude);
-      const ele = carto.height;
+      // const lat = Math.toDegrees(carto.latitude);
+      // const lon = Math.toDegrees(carto.longitude);
+      // const ele = carto.height;
 
       const orientation = flightOrientation.getValue(clock.currentTime);
       const heading = Math.toDegrees(Quaternion.computeAngle(orientation));
@@ -656,6 +662,17 @@ function main() {
 
       compass.value = (heading + 180) % 360;
       speed.value = kmPerHour;
+      altitude.value = carto.height;
+
+      var bo = viewer.selectedEntity.properties.basket_orientation.getValue(
+        clock.currentTime
+      );
+      var bi = viewer.selectedEntity.properties.burner_intervals.getValue(
+        clock.currentTime
+      );
+      temperature.value = viewer.selectedEntity.properties.temperature.getValue(
+        clock.currentTime
+      );
     }
   });
 
