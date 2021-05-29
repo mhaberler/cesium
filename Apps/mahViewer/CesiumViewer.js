@@ -101,6 +101,29 @@ var czml = [
         ],
       },
     },
+    orientation: {
+      interpolationAlgorithm: "LINEAR",
+      interpolationDegree: 1,
+      epoch: "2021-05-24T04:21:32Z",
+
+      unitQuaternion: [
+        0,
+        0.45652188368372576,
+        -0.049580035995243577,
+        -0.8819344359461565,
+        0.10640131785324795,
+        300,
+        0.309688526062018,
+        -0.0592870464529779,
+        -0.945283886004075,
+        0.0837641797515638,
+        615,
+        0.15524757622990795,
+        -0.06613430791377527,
+        -0.9841132393764626,
+        0.05518673278488507,
+      ],
+    },
     position: {
       epoch: "2021-05-24T04:21:32Z",
       interpolationAlgorithm: "LAGRANGE",
@@ -649,6 +672,7 @@ function main() {
         clock.currentTime
       );
       const carto = Cartographic.fromCartesian(position);
+      altitude.value = carto.height;
 
       // const lat = Math.toDegrees(carto.latitude);
       // const lon = Math.toDegrees(carto.longitude);
@@ -656,13 +680,11 @@ function main() {
 
       const orientation = flightOrientation.getValue(clock.currentTime);
       const heading = Math.toDegrees(Quaternion.computeAngle(orientation));
+      compass.value = (heading + 180) % 360;
 
       velocityVectorProperty.getValue(clock.currentTime, velocityVector);
       var kmPerHour = Cartesian3.magnitude(velocityVector) * 3.6;
-
-      compass.value = (heading + 180) % 360;
       speed.value = kmPerHour;
-      altitude.value = carto.height;
 
       var bo = viewer.selectedEntity.properties.basket_orientation.getValue(
         clock.currentTime
