@@ -13,9 +13,58 @@
     <title>Cesium Viewer</title>
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="CesiumViewer.css" media="screen" />
+    <script src="/node_modules/canvas-gauges/gauge.min.js"></script>
+
+    <link rel="stylesheet" href="index.css" media="screen" />
   </head>
   <body style="background: #000">
     <div id="cesiumContainer" class="fullWindow"></div>
+
+    <!-- Some input elements for our app. -->
+    <div class="backdrop" id="menu">
+      <h2>Flight Data</h2>
+      <div class="nowrap">
+        <canvas id="compass"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="speed"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="temperature"></canvas>
+      </div>
+
+      <span><strong>Camera Mode</strong></span>
+      <div class="nowrap">
+        <input id="freeMode" name="source" type="radio" checked />
+        <label for="freeMode">Free</label>
+      </div>
+      <div class="nowrap">
+        <input id="droneMode" name="source" type="radio" />
+        <label for="droneMode">Drone View</label>
+      </div>
+      <br />
+      <span><strong>3d Tile Styling</strong></span>
+      <div class="nowrap">
+        <select id="tileStyle">
+          <option value="none">None</option>
+          <option value="height">Height</option>
+          <option value="transparent">Transparent</option>
+        </select>
+      </div>
+      <br />
+      <span><strong>Display Options</strong></span>
+      <div class="nowrap">
+        <input id="shadows" type="checkbox" />
+        <label for="shadows">Shadows</label>
+      </div>
+
+      <div class="nowrap">
+        <input id="neighborhoods" type="checkbox" checked />
+        <label for="neighborhoods">Neighborhoods</label>
+      </div>
+      <br />
+    </div>
+
     <div id="loadingIndicator" class="loadingIndicator"></div>
     <script src="CesiumViewer.js" type="module"></script>
   </body>
