@@ -6,14 +6,13 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
-    />
+      />
     <meta
       name="description"
       content="Use Viewer to start building new applications or easily embed Cesium into existing applications."
-    />
+      />
     <meta name="cesium-sandcastle-labels" content="Beginner, Showcases" />
     <title>Cesium Demo</title>
-
 
     <!-- <base href="https://stiwoll.mah.priv.at/sandbox/cesium/Apps/Sandcastle/gallery/"> -->
     <base href="../Apps/Sandcastle/gallery/">
@@ -24,13 +23,15 @@
       type="text/javascript"
       src="../../../Build/CesiumUnminified/Cesium.js"
       nomodule
-    ></script>
+      ></script>
     <script type="module" src="../load-cesium-es6.js"></script>
+
   </head>
+
   <body
     class="sandcastle-loading"
     data-sandcastle-bucket="bucket-requirejs.html"
-  >
+    >
     <style>
       @import url(../templates/bucket.css);
     </style>
@@ -39,15 +40,17 @@
     <div id="toolbar"></div>
     <script id="cesium_sandcastle_script">
       function startup(Cesium) {
-        "use strict";
-        //Sandcastle_Begin
-        var viewer = new Cesium.Viewer("cesiumContainer");
-        //Sandcastle_End
-        Sandcastle.finishedLoading();
+          "use strict";
+          Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
+
+          //Sandcastle_Begin
+          var viewer = new Cesium.Viewer("cesiumContainer");
+          //Sandcastle_End
+          Sandcastle.finishedLoading();
       }
       if (typeof Cesium !== "undefined") {
-        window.startupCalled = true;
-        startup(Cesium);
+          window.startupCalled = true;
+          startup(Cesium);
       }
     </script>
   </body>
