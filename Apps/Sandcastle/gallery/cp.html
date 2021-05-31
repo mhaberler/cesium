@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <meta name="description" content="CZML Path" />
+    <meta name="cesium-sandcastle-labels" content="CZML" />
+    <title>Cesium Demo</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script
+      type="text/javascript"
+      src="../../../Build/CesiumUnminified/Cesium.js"
+      nomodule
+    ></script>
+    <script type="module" src="../load-cesium-es6.js"></script>
+  </head>
+
+  <body
+    class="sandcastle-loading"
+    data-sandcastle-bucket="bucket-requirejs.html"
+  >
+    <style>
+      @import url(../templates/bucket.css);
+    </style>
+    <div id="cesiumContainer" class="fullSize"></div>
+    <div id="loadingOverlay">
+      <h1>Loading...</h1>
+    </div>
+    <div id="toolbar"></div>
+
+    <script id="cesium_sandcastle_script">
+      Sandcastle.addToolbarButton("Toggle Boxes", function () {
+        console.log("Toggle Boxes");
+      });
+
+      Sandcastle.addToolbarButton("Toggle Ellipsoids", function () {
+        console.log("Toggle Ellipsoids");
+      });
+
+      var altDisplay = document.createElement("div");
+      var gndDisplay = document.createElement("div");
+
+      // https://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
+      function getSearchParameters() {
+        var prmstr = window.location.search.substr(1);
+        return prmstr != null && prmstr != ""
+          ? transformToAssocArray(prmstr)
+          : {};
+      }
+
+      function transformToAssocArray(prmstr) {
+        var params = {};
+        var prmarr = prmstr.split("&");
+        for (var i = 0; i < prmarr.length; i++) {
+          var tmparr = prmarr[i].split("=");
+          params[tmparr[0]] = tmparr[1];
+        }
+        return params;
+      }
+      var params = getSearchParameters();
+
+      function startup(Cesium) {
+        "use strict";
+        //Sandcastle_Begin
+
+        Cesium.Ion.defaultAccessToken =
+          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
+
+        // Construct the default list of terrain sources.
+        // https://stackoverflow.com/questions/28291013/get-ground-altitude-cesiumjs
+        //var terrainModels = Cesium.createDefaultTerrainProviderViewModels();
+
+        var viewer = new Cesium.Viewer("cesiumContainer", {
+          //terrainProviderViewModels: terrainModels,
+          //selectedTerrainProviderViewModel: terrainModels[1], // Select STK High-res terrain
+          terrainProvider: Cesium.createWorldTerrain(),
+          baseLayerPicker: true,
+          shouldAnimate: false, //true, //
+          vrButton: true,
+          // Click the VR button in the bottom right of the screen to switch to VR mode.
+
+          // scene3DOnly: true,
+          //  baseLayerPicker: true,
+          // imageryProvider: new Cesium.UrlTemplateImageryProvider({
+          //   url: defaultBaseMapLayer.layerUrl,
+          //   maximumLevel: defaultBaseMapLayer.maxZoom,
+          //   credit: defaultBaseMapLayer.attribution
+          // }),
+          animation: true, // true: use Cesium.Animation control widget
+          fullscreenButton: true,
+          geocoder: false,
+          homeButton: false,
+          infoBox: true,
+          sceneModePicker: true,
+          selectionIndicator: true,
+          timeline: true,
+          navigationHelpButton: true,
+          navigationInstructionsInitiallyVisible: false,
+          //scene3DOnly: true,
+          automaticallyTrackDataSourceClocks: true,
+          // creditContainer: 'creditContainer'
+          // vrButton: true,
+          //    homeButton: false,
+          //    infoBox: false,
+          // navigationInstructionsInitiallyVisible: false, //true,
+          //      sceneMode: Cesium.SceneMode.SCENE3D, // Cesium.SceneMode.SCENE2D,
+          //  globe: false
+        });
+
+        if (params.inspector) {
+          viewer.extend(Cesium.viewerCesiumInspectorMixin);
+        }
+
+        //Add basic drag and drop functionality
+        viewer.extend(Cesium.viewerDragDropMixin);
+        //Show a pop-up alert if we encounter an error when processing a dropped file
+        viewer.dropError.addEventListener(function (dropHandler, name, error) {
+          console.log(error);
+          window.alert(error);
+        });
+
+        // https://sandcastle.cesium.com/index.html?src=Time%20Dynamic%20Wheels.html&label=All
+        var velocityVector = new Cesium.Cartesian3();
+
+        var path = null;
+
+        function trackEntity(clock) {
+          if (viewer.selectedEntity) {
+            // Get the position of our entity at the current time, if possible (otherwise undefined).
+            var pos = viewer.selectedEntity.position.getValue(
+              clock.currentTime,
+              scratchCartesian
+            );
+            if (pos) {
+              // If position is valid, convert from Cartesian3 to Cartographic.
+              var lla = Cesium.Cartographic.fromCartesian(
+                pos,
+                Cesium.Ellipsoid.WGS84,
+                scratchCartographic
+              );
+              gndDisplay.innerHTML =
+                viewer.selectedEntity.name +
+                ": " +
+                lla.height.toFixed(1) +
+                " m";
+            }
+          }
+        }
+
+        viewer.selectedEntityChanged.addEventListener(function (entity) {
+          if (entity) {
+            // https://sandcastle.cesium.com/index.html?src=Time%20Dynamic%20Wheels.html&label=All
+            // A velocity vector property will give us the entity's speed and direction at any given time.
+            var velocityVectorProperty = new Cesium.VelocityVectorProperty(
+              entity.position,
+              false
+            );
+            viewer.clock.onTick.addEventListener(trackEntity);
+
+            console.log(entity.name);
+          } else {
+            viewer.clock.onTick.removeEventListener(trackEntity);
+            gndDisplay.innerHTML = "";
+            console.log("deselect");
+          }
+        });
+
+        function sourceAdded(datasource) {
+          //path = viewer.dataSources.entities.getById("path");
+          var p = datasource.entities.values;
+          for (var i = 0; i < p.length; i++) {
+            console.log(p[i].id);
+            console.log(p[i].name);
+            console.log(p[i].path);
+            console.log(p[i].position);
+          }
+        }
+
+        var dataSourceCollection = viewer.dataSources;
+        dataSourceCollection.dataSourceAdded.addEventListener(function (
+          collection,
+          datasource
+        ) {
+          //sourceAdded(datasource);
+          viewer.trackedEntity = datasource.entities.getById("aircraft");
+          viewer.selectedEntity = viewer.trackedEntity;
+          viewer.zoomTo(
+            viewer.trackedEntity,
+            new Cesium.HeadingPitchRange(Math.PI / 2, -Math.PI / 4, 400)
+          );
+          //viewer.flyTo(datasource);
+          //viewer.trackedEntity.viewFrom = new Cesium.Cartesian3(0, -750, 200);
+          //viewer.camera.zoomOut(1000);
+          console.log(viewer.trackedEntity);
+        });
+
+        Sandcastle.addToolbarButton("zoomTo", function () {
+          viewer.zoomTo(
+            viewer.trackedEntity,
+            new Cesium.HeadingPitchRange(Math.PI / 2, -Math.PI / 4, 400)
+          );
+        });
+
+        Sandcastle.addToolbarButton("flyTo", function () {
+          viewer.flyTo(viewer.trackedEntity, {
+            offset: new Cesium.HeadingPitchRange(
+              Math.PI / 2,
+              -Math.PI / 4,
+              400
+            ),
+          });
+        });
+
+        viewer.clock.onTick.addEventListener(function (clock) {
+          if (viewer.trackedEntity && path) {
+            // Get the position of our entity at the current time, if possible (otherwise undefined).
+            var pos = path.getValue(clock.currentTime, scratchCartesian);
+            // If position is valid, convert from Cartesian3 to Cartographic.
+            var lla = Cesium.Cartographic.fromCartesian(
+              pos,
+              Cesium.Ellipsoid.WGS84,
+              scratchCartographic
+            );
+
+            // Finally, convert from radians to degrees.
+            altDisplay.innerHTML =
+              "Longitude: " +
+              Cesium.Math.toDegrees(lla.longitude).toFixed(3) +
+              " deg\n" +
+              " Latitude: " +
+              Cesium.Math.toDegrees(lla.latitude).toFixed(3) +
+              " deg\n" +
+              " Altitude: " +
+              lla.height.toFixed(1) +
+              " m";
+            // " Altitude: " + Cesium.Math.toDegrees(lla.height/100.).toFixed(4) + " m";
+            //
+            //
+            // if (once) {
+            //   viewer.trackedEntity.debugWireframe = true;
+            //   viewer.trackedEntity.modelMatrix = Cesium.Matrix4.fromTranslation(new Cesium.Cartesian3(0, 0, 2000));
+            //   once = false;
+            // }
+            //
+            // // Sample the terrain (async) and write the answer to the console.
+            // Cesium.sampleTerrain(viewer.terrainProvider, 11, [lla])
+            //   .then(function(samples) {
+            //     gndDisplay.innerHTML = samples[0].height.toFixed(1);
+            //     //console.log('Height in meters is: ' + samples[0].height);
+            //   });
+          }
+        });
+
+        // Get a reference to the ellipsoid, with terrain on it.  (This API may change soon)
+        var ellipsoid = viewer.scene.globe.ellipsoid;
+
+        //Enabling lighting depending on time of day
+        viewer.scene.globe.enableLighting = true;
+        viewer.scene.globe.depthTestAgainstTerrain = true;
+
+        // Pre-allocate some memory, so we don't re-allocate 30~60 times per second.
+        var scratchCartesian = new Cesium.Cartesian3();
+        var scratchCartographic = new Cesium.Cartographic();
+
+        var once = true;
+
+        if (params.czml) {
+          var promise = Cesium.CzmlDataSource.load(params.czml);
+          promise.then(function (dataSource) {
+            viewer.dataSources.add(dataSource);
+
+            // viewer.trackedEntity = dataSource.entities.getById("aircraft");
+            // var path = dataSource.entities.getById("path");
+            // path.model = viewer.trackedEntity;
+            // viewer.clock.onTick.addEventListener(function(clock) {
+            //   if (viewer.trackedEntity) {
+            //     // Get the position of our entity at the current time, if possible (otherwise undefined).
+            //     var pos = path.getValue(clock.currentTime, scratchCartesian);
+            //     // If position is valid, convert from Cartesian3 to Cartographic.
+            //     var lla = Cesium.Cartographic.fromCartesian(pos, Cesium.Ellipsoid.WGS84,
+            //       scratchCartographic);
+            //
+            //     // Finally, convert from radians to degrees.
+            //     altDisplay.innerHTML =
+            //       "Longitude: " + Cesium.Math.toDegrees(lla.longitude).toFixed(3) + " deg\n" +
+            //       " Latitude: " + Cesium.Math.toDegrees(lla.latitude).toFixed(3) + " deg\n" +
+            //       " Altitude: " + lla.height.toFixed(1) + " m";
+            //     // " Altitude: " + Cesium.Math.toDegrees(lla.height/100.).toFixed(4) + " m";
+            //
+            //
+            //     if (once) {
+            //       viewer.trackedEntity.debugWireframe = true;
+            //       viewer.trackedEntity.modelMatrix = Cesium.Matrix4.fromTranslation(new Cesium.Cartesian3(0, 0, 2000));
+            //       once = false;
+            //     }
+            //
+            //     // Sample the terrain (async) and write the answer to the console.
+            //     Cesium.sampleTerrain(viewer.terrainProvider, 11, [lla])
+            //       .then(function(samples) {
+            //         gndDisplay.innerHTML = samples[0].height.toFixed(1);
+            //         //console.log('Height in meters is: ' + samples[0].height);
+            //       });
+            //
+            //   }
+            // });
+          });
+          viewer.zoomTo(promise);
+        }
+
+        altDisplay.style.background = "rgba(42, 42, 42, 0.7)";
+        altDisplay.style.padding = "5px 10px";
+        altDisplay.style.marginTop = "5px";
+        document.getElementById("toolbar").appendChild(altDisplay);
+        gndDisplay.style.background = "rgba(42, 42, 42, 0.7)";
+        gndDisplay.style.padding = "5px 10px";
+        gndDisplay.style.marginTop = "5px";
+        document.getElementById("toolbar").appendChild(gndDisplay);
+
+        //Sandcastle_End
+        Sandcastle.finishedLoading();
+      }
+      if (typeof Cesium !== "undefined") {
+        window.startupCalled = true;
+        startup(Cesium);
+      }
+    </script>
+  </body>
+</html>
