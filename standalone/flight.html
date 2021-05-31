@@ -38,7 +38,7 @@
     <style>
       @import url(../templates/bucket.css);
       #toolbar {
-          background: rgba(42, 42, 42, 0.9);
+          background: rgba(42, 42, 42, 0.0);
           padding: 4px;
           border-radius: 4px;
       }
@@ -47,12 +47,25 @@
           padding-top: 2px;
           padding-bottom: 2px;
       }
+      #burner {
+          position: relative;
+          width: 5em;
+          height: 5em;
+          border: 2px solid #000;
+          border-radius: 2.5em;
+          background-image: radial-gradient(farthest-corner at 50% 20%, #b30000 0%, #330000 100%);
+          box-shadow: 0 0.5em 1em rgba(102, 0, 0, 0.1);
+      }
+      #burner.on {
+          background-image: radial-gradient(farthest-corner at 50% 75%, red 0%, #990000 100%);
+          box-shadow: 0 1em 1.5em rgba(255, 128, 0, 0.8);
+      }
     </style>
 
     <div id="cesiumContainer" class="fullSize"></div>
 
     <div id="toolbar" >
-      <h2>Flight</h2>
+      <!-- <h2>Flight</h2> -->
       <table>
         <tbody>
           <tr>
@@ -74,7 +87,12 @@
             <td>
               <canvas id="temperature"></canvas>
             </td>
-          </tr>
+          </tr
+          <tr>
+            <td>
+              <div id="burner" class="off"></div>
+            </td>
+          </tr
         </tbody>
       </table>
     </div>
@@ -157,7 +175,7 @@
           var selectedImagery = imageryViewModels[imageryViewModels.length - 1];
 
           var loadingIndicator = document.getElementById("loadingIndicator");
-          // burnerled = document.getElementById("burner");
+          var burnerled = document.getElementById("burner");
 
           var viewer;
           try {
@@ -428,6 +446,8 @@
               needleWidth: 3,
               colorNeedle: "#222",
               colorNeedleEnd: "#222",
+              // colorPlate:  "rgba(0,0,0,0)",
+
               animationDuration: 1500,
               animationRule: "linear",
               animationTarget: "plate",
@@ -568,6 +588,7 @@
                   if (bs != burnerstate) {
                       console.log("burner change to: ", bs);
                       burnerstate = bs;
+                      burnerled.className = burnerstate ? "on" : "off";
                   }
 
                   temperature.value = viewer.selectedEntity.properties.temperature.getValue(
