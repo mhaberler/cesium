@@ -13,17 +13,17 @@
       content="Adjust lighting on the globe as seen from space."
       />
     <meta name="cesium-sandcastle-labels" content="Showcases" />
-    <title>Sandcastke Ground atmosphere demo - standalone</title>
+    <title>Sandcastle Ground atmosphere demo - standalone</title>
 
     <base href="https://stiwoll.mah.priv.at/sandbox/cesium/Apps/Sandcastle/gallery/">
-    <script type="text/javascript" src="../Sandcastle-header.js"></script>
-    <script type="text/javascript" src="https://stiwoll.mah.priv.at/sandbox/cesium/Build/Cesium/Cesium.js"></script>
 
-    <!-- <script -->
-    <!--   type="text/javascript" -->
-    <!--   src="../../../Build/CesiumUnminified/Cesium.js" -->
-    <!--   nomodule -->
-    <!--   ></script> -->
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+
+    <!-- Minified: -->
+    <!-- <script type="text/javascript" src="../../../Build/Cesium/Cesium.js" nomodule ></script> -->
+
+    <!-- Unminifed, for development -->
+    <script type="text/javascript" src="../../../Build/CesiumUnminified/Cesium.js" nomodule ></script>
 
     <script type="module" src="../load-cesium-es6.js"></script>
   </head>
@@ -34,7 +34,7 @@
     <style>
       @import url(../templates/bucket.css);
       #toolbar {
-          background: rgba(42, 42, 42, 0.8);
+          background: rgba(42, 42, 42, 0.9);
           padding: 4px;
           border-radius: 4px;
       }
