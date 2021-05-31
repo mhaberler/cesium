@@ -1,5 +1,24 @@
 window.CESIUM_BASE_URL = "../../Source/";
 
+// import {
+//     Ion,
+//     Cartesian3,
+//     createWorldTerrain,
+//     defined,
+//     formatError,
+//     Math as CesiumMath,
+//     objectToQuery,
+//     queryToObject,
+//     CzmlDataSource,
+//     GeoJsonDataSource,
+//     KmlDataSource,
+//     TileMapServiceImageryProvider,
+//     Viewer,
+//     viewerCesiumInspectorMixin,
+//     viewerDragDropMixin,
+// } from "../../Source/Cesium.js";
+
+
 import {
     Ion,
     Cartesian3,
@@ -16,9 +35,9 @@ import {
     Viewer,
     viewerCesiumInspectorMixin,
     viewerDragDropMixin,
-} from "../../Source/Cesium.js";
+} from "../../Source/Cesium.js"; //"../../../../Build/CesiumUnminified/Cesium.js";
 
-function main() {
+function startup(Cesium) {
     /*
       Options parsed from query string:
       source=url          The URL of a CZML/GeoJSON/KML data source to load at startup.
@@ -49,7 +68,7 @@ function main() {
       traj=url
     */
 
-    Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
+    Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
     var endUserOptions = queryToObject(window.location.search.substring(1));
 
     var imageryProvider;
@@ -315,4 +334,7 @@ function main() {
     loadingIndicator.style.display = "none";
 }
 
-main();
+if (typeof Cesium !== "undefined") {
+    window.startupCalled = true;
+    startup(Cesium);
+}
