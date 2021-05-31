@@ -13,13 +13,10 @@
       content="Adjust lighting on the globe as seen from space."
       />
     <meta name="cesium-sandcastle-labels" content="Showcases" />
-    <title>STANDALONE</title>
+    <title>Sandcastke Ground atmosphere demo - standalone</title>
 
     <base href="https://stiwoll.mah.priv.at/sandbox/cesium/Apps/Sandcastle/gallery/">
-
     <script type="text/javascript" src="../Sandcastle-header.js"></script>
-
-
     <script type="text/javascript" src="https://stiwoll.mah.priv.at/sandbox/cesium/Build/Cesium/Cesium.js"></script>
 
     <!-- <script -->
@@ -127,6 +124,11 @@
       function startup(Cesium) {
           "use strict";
           //Sandcastle_Begin
+
+          // Your access token can be found at: https://cesium.com/ion/tokens.
+          Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3YmJlMzAyYy1hZTY4LTQ4OTUtYTIxMS02NTBlYzc1MDcxNTAiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjU0NzE5Mzl9.j9eQVA5txZG-lRmcUBEwgzRuAWzd0fPxgf5LmM_xNLU";
+;
+
           var viewer = new Cesium.Viewer("cesiumContainer", {
               sceneModePicker: false,
           });
