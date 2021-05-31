@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <meta name="description" content="Model Orientation from path">
+    <meta name="cesium-sandcastle-labels" content="model orientation">
+    <title>Cesium Demo</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script
+      type="text/javascript"
+      src="../CesiumUnminified/Cesium.js"
+
+    ></script>
+
+  </head>
+  <body
+    class="sandcastle-loading"
+    data-sandcastle-bucket="bucket-requirejs.html"
+  >
+<style>
+    @import url(../templates/bucket.css);
+</style>
+<div id="cesiumContainer" class="fullSize"></div>
+<div id="loadingOverlay"><h1>Loading...</h1></div>
+<div id="toolbar"></div>
+<script id="cesium_sandcastle_script">
+function startup(Cesium) {
+    'use strict';
+//Sandcastle_Begin
+
+var viewer = new Cesium.Viewer('cesiumContainer', {
+baseLayerPicker : false
+});
+
+var options = {
+    camera : viewer.scene.camera,
+    canvas : viewer.scene.canvas
+};
+
+
+var czml = [{
+    "id" : "document",
+    "name" : "CZML Path",
+    "version" : "1.0",
+    "clock": {
+        "interval": "2012-08-04T10:00:00Z/2012-08-04T15:00:00Z",
+        "currentTime": "2012-08-04T10:00:00Z",
+        "multiplier": 10
+    }
+}, {
+    "id" : "path",
+    "name" : "path with GPS flight data",
+    "description" : "<p>Hang gliding flight log data from Daniel H. Friedman.<br>Icon created by Larisa Skosyrska from the Noun Project</p>",
+    "availability" : "2012-08-04T10:00:00Z/2012-08-04T15:00:00Z",
+    "path" : {
+        "material" : {
+            "polylineOutline" : {
+                "color" : {
+                    "rgba" : [255, 0, 255, 255]
+                },
+                "outlineColor" : {
+                    "rgba" : [0, 255, 255, 255]
+                },
+                "outlineWidth" : 5
+            }
+        },
+        "width" : 8,
+        "leadTime" : 10,
+        "trailTime" : 1000,
+        "resolution" : 5
+    },
+    "model": {
+        "gltf" : "../../SampleData/models/CesiumAir/Cesium_Air.glb",
+        "scale" : 2.0,
+        "minimumPixelSize": 128
+    },
+    "position" : {
+        "epoch" : "2012-08-04T10:00:00Z",
+        "cartographicDegrees" : [
+            0,-122.93797,39.50935,1776,
+            10,-122.93822,39.50918,1773,
+            20,-122.9385,39.50883,1772,
+            30,-122.93855,39.50842,1770,
+            40,-122.93868,39.50792,1770,
+            50,-122.93877,39.50743,1767,
+            60,-122.93862,39.50697,1771,
+            70,-122.93828,39.50648,1765,
+            80,-122.93818,39.50608,1770,
+            90,-122.93783,39.5057,1754,
+            100,-122.93777,39.50513,1732,
+            110,-122.93793,39.50458,1727,
+            120,-122.93815,39.50415,1717,
+            130,-122.9382,39.50362,1713,
+            140,-122.93818,39.5031,1703,
+            150,-122.93812,39.50258,1706,
+            160,-122.93792,39.5022,1707,
+            170,-122.93775,39.50177,1698,
+            180,-122.93745,39.50125,1693,
+            190,-122.93723,39.50073,1694,
+            200,-122.9373,39.50023,1702
+        ]
+    }
+}];
+
+Sandcastle.addToolbarMenu([{
+    text : 'Lateral avoidance w. real Wx and waypoints (KJFK-LEBL)',
+    onselect : function() {
+
+        viewer.camera.flyHome(0);
+
+        viewer.dataSources.add(Cesium.CzmlDataSource.load(czml)).then(function(ds) {
+
+        var entity = ds.entities.getById('path');
+
+        // viewer.trackedEntity = entity;
+
+        entity.orientation =  new Cesium.VelocityOrientationProperty(entity.position);
+
+        entity.position.setInterpolationOptions({
+            interpolationDegree : 1,
+            interpolationAlgorithm : Cesium.HermitePolynomialApproximation
+          });
+    });
+
+    }
+}], 'toolbar');
+
+Sandcastle.reset = function() {
+    viewer.dataSources.removeAll();
+    viewer.clock.clockRange = Cesium.ClockRange.UNBOUNDED;
+    viewer.clock.clockStep = Cesium.ClockStep.SYSTEM_CLOCK;
+};//Sandcastle_End
+    Sandcastle.finishedLoading();
+}
+if (typeof Cesium !== 'undefined') {
+    window.startupCalled = true;
+    startup(Cesium);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>StandMah</title>
+
+    <script
+      type="text/javascript"
+      src="../../Build/CesiumUnminified/Cesium.js"
+      nomodule
+    ></script>
+    <script type="text/javascript" src="Sandcastle-header.js"></script>
+    <script type="text/javascript" src="ThirdParty/pako.min.js"></script>
+    <script type="module" src="load-cesium-es6.js"></script>
+    <script type="text/javascript" src="Sandcastle-helpers.js"></script>
+    <link
+      rel="stylesheet"
+      href="../CesiumViewer/CesiumViewer.css"
+      media="screen"
+    />
+    <script src="/node_modules/canvas-gauges/gauge.min.js"></script>
+
+    <!-- <style> -->
+    <!--   .fullSize { -->
+    <!--     display: none; -->
+    <!--   } -->
+    <!--   .sandcastle-loading::after { -->
+    <!--     font: 24px sans-serif; -->
+    <!--     content: "Loading..."; -->
+    <!--   } -->
+    <!-- </style> -->
+  </head>
+  <body
+    class="sandcastle-loading"
+    data-sandcastle-bucket="bucket-requirejs.html"
+  >
+    <div id="cesiumContainer" class="fullSize"></div>
+
+    <div id="toolbar">
+      <h2>Flight Data</h2>
+      <div class="nowrap">
+        <canvas id="compass"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="altitude"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="speed"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="temperature"></canvas>
+      </div>
+    </div>
+    <div id="loadingIndicator" class="loadingIndicator"></div>
+
+    <!--   // Since we are setting the HTML base href below, we need to get the getCesiumBaseUrl -->
+    <!--   // upfront so that the value is correct. It gets cached for future calls. -->
+    <!--   // This is only a problem when using combined Cesium, which is the only time Cesium -->
+    <!--   // will be defined below. -->
+    <!--   // if (typeof Cesium !== "undefined") { -->
+    <!--   //   Cesium.buildModuleUrl.getCesiumBaseUrl(); -->
+    <!--   // } -->
+
+    <!--   //var viewer = new Cesium.Viewer("cesiumContainer"); -->
+    <!-- </script> -->
+
+    <!-- <script type="text/javascript" src="Sandcastle-client.js"></script> -->
+
+    <script src="standFlight.js" type="module"></script>
+
+    <script type="text/javascript"></script>
+  </body>
+</html>

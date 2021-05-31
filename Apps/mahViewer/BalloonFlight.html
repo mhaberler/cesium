@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Use correct character set. -->
+    <meta charset="utf-8" />
+    <!-- Tell IE to use the latest, best version. -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Make the application on mobile take up the full browser screen and disable user scaling. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <title>Balloon Flight</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <script src="/node_modules/canvas-gauges/gauge.min.js"></script>
+
+    <link rel="stylesheet" href="CesiumViewer.css" media="screen" />
+    <!-- <link rel="stylesheet" href="BalloonFlight.css" media="screen" /> -->
+  </head>
+  <body style="background: #000">
+    <div id="cesiumContainer" class="fullWindow"></div>
+
+    <!-- Some input elements for our app. -->
+    <div class="backdrop" id="menu">
+      <h2>Flight Data</h2>
+      <div class="nowrap">
+        <canvas id="compass"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="altitude"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="speed"></canvas>
+      </div>
+      <div class="nowrap">
+        <canvas id="temperature"></canvas>
+      </div>
+
+      <!-- <span><strong>Burner</strong></span> -->
+
+      <!-- <div class="nowrap" id="burner"> -->
+      <!--   Burner -->
+      <!-- </div> -->
+
+
+    <div id="loadingIndicator" class="loadingIndicator"></div>
+    <script src="BalloonFlight.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="Demo the minimum set of options needed to remove all external dependencies, for offline operation."
+    />
+    <meta name="cesium-sandcastle-labels" content="Beginner, Showcases" />
+    <title>Cesium Demo</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <!-- <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="  crossorigin="anonymous"></script>  -->
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.14/require.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"
+    />
+
+    <!-- <script type="text/javascript" src="../../../ThirdParty/requirejs-2.1.20/require.js"></script> -->
+    <script type="text/javascript">
+      require.config({
+        baseUrl: "../../../Source",
+        waitSeconds: 60,
+      });
+    </script>
+  </head>
+  <body
+    class="sandcastle-loading"
+    data-sandcastle-bucket="bucket-requirejs.html"
+  >
+    <style>
+      @import url(../templates/bucket.css);
+      <!-- import url(../templates/jqueryui.css); -->
+    </style>
+    <div id="cesiumContainer" class="fullSize"></div>
+    <div id="loadingOverlay"><h1>Loading...</h1></div>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-3">
+      <div class="container-fluid">
+        <a href="#" class="navbar-brand mr-3">Tutorial Republic</a>
+        <button
+          type="button"
+          class="navbar-toggler"
+          data-toggle="collapse"
+          data-target="#navbarCollapse"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <div class="navbar-nav">
+            <a href="#" class="nav-item nav-link active">Home</a>
+            <a href="#" class="nav-item nav-link">Services</a>
+            <a href="#" class="nav-item nav-link">About</a>
+            <a href="#" class="nav-item nav-link">Contact</a>
+          </div>
+          <div class="navbar-nav ml-auto">
+            <a href="#" class="nav-item nav-link">Register</a>
+            <a href="#" class="nav-item nav-link">Login</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div id="toolbar">
+      <table>
+        <tbody>
+          <tr>
+            <td>Alpha</td>
+            <td>
+              <input
+                type="range"
+                min="0.0"
+                max="1.0"
+                step="0.01"
+                data-bind="value: alpha, valueUpdate: 'input'"
+              />
+              <input type="text" size="5" data-bind="value: alpha" />
+            </td>
+          </tr>
+          <tr>
+            <td>Brightness</td>
+            <td>
+              <input
+                type="range"
+                min="0.0"
+                max="10.0"
+                step="0.01"
+                data-bind="value: brightness, valueUpdate: 'input'"
+              />
+              <input type="text" size="5" data-bind="value: brightness" />
+            </td>
+          </tr>
+          <tr>
+            <td>Saturation</td>
+            <td>
+              <input
+                type="range"
+                min="0.0"
+                max="10.0"
+                step="0.01"
+                data-bind="value: saturation, valueUpdate: 'input'"
+              />
+              <input type="text" size="5" data-bind="value: saturation" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script id="cesium_sandcastle_script">
+      function startup(Cesium) {
+        "use strict";
+        // var imageryProvider = new Cesium.UrlTemplateImageryProvider({
+        //     url:'../../../Source/Assets/Textures/GoogleSatelliteTag/{z}/{x}-{y}.png',
+        //     fileExtension : "png",
+        //     maximumLevel : 11
+        // });
+
+        var viewModel = {
+          alpha: 1,
+          brightness: 1,
+          saturation: 1,
+        };
+        Cesium.knockout.track(viewModel);
+        var toolbar = document.getElementById("toolbar");
+        Cesium.knockout.applyBindings(viewModel, toolbar);
+
+        var viewer = new Cesium.Viewer("cesiumContainer", {
+          //     imageryProvider: imageryProvider,
+          baseLayerPicker: true,
+          timeline: false,
+          fullscreenButton: false,
+          homeButton: false,
+          navigationHelpButton: false,
+          sceneModePicker: false,
+          animation: false,
+          geocoder: false,
+        });
+
+        var imageryLayers = viewer.imageryLayers;
+        var layerCount = imageryLayers.length;
+
+        Cesium.knockout
+          .getObservable(viewModel, "alpha")
+          .subscribe(function (newValue) {
+            console.log("now the alpha is : " + newValue);
+            imageryLayers.get(0).brightness = viewModel.alpha;
+          });
+
+        Cesium.knockout
+          .getObservable(viewModel, "brightness")
+          .subscribe(function (newValue) {
+            console.log("now the brightness is : " + newValue);
+            imageryLayers.get(0).brightness = viewModel.brightness;
+          });
+
+        Cesium.knockout
+          .getObservable(viewModel, "saturation")
+          .subscribe(function (newValue) {
+            console.log("now the saturation is : " + newValue);
+            imageryLayers.get(0).saturation = viewModel.saturation;
+          });
+
+        function createModel(url, height) {
+          viewer.entities.removeAll();
+
+          var position = Cesium.Cartesian3.fromDegrees(
+            -123.0744619,
+            44.0503706,
+            height
+          );
+          var heading = Cesium.Math.toRadians(0);
+          var pitch = 0;
+          var roll = 0;
+          var hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll);
+          var orientation = Cesium.Transforms.headingPitchRollQuaternion(
+            position,
+            hpr
+          );
+
+          var entity = viewer.entities.add({
+            name: url,
+            position: position,
+            orientation: orientation,
+            model: {
+              uri: url,
+              minimumPixelSize: 128,
+              maximumScale: 20000,
+            },
+          });
+
+          return entity;
+        }
+
+        Sandcastle.finishedLoading();
+
+        //加入显示了自己的模型
+        var entity = createModel(
+          "../../SampleData/models/GroundVehicle/GroundVehicle.glb",
+          0
+        );
+
+        //鼠标选择模型
+        var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+        handler.setInputAction(function (click) {
+          var pickedObject = viewer.scene.pick(click.position);
+          if (Cesium.defined(pickedObject)) {
+            var entityId = pickedObject.id._id;
+            console.log("Picked entityId = " + entityId);
+          }
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+        //让模型旋转的gizmos
+
+        //让模型移动的gizmos
+        var ellipsoidInstance = new Cesium.GeometryInstance({
+          geometry: new Cesium.CylinderGeometry({
+            length: 200000,
+            topRadius: 10,
+            bottomRadius: 10,
+          }),
+          modelMatrix: Cesium.Matrix4.multiplyByTranslation(
+            Cesium.Transforms.eastNorthUpToFixedFrame(
+              Cesium.Cartesian3.fromDegrees(116.3002283764, 39.9181370976)
+            ),
+            new Cesium.Cartesian3(0.0, 0.0, 0.0),
+            new Cesium.Matrix4()
+          ),
+          id: "ellipsoid",
+          attributes: {
+            color: Cesium.ColorGeometryInstanceAttribute.fromColor(
+              Cesium.Color.RED
+            ),
+          },
+        });
+
+        viewer.scene.primitives.add(
+          new Cesium.Primitive({
+            geometryInstances: [ellipsoidInstance],
+            appearance: new Cesium.PerInstanceColorAppearance(),
+          })
+        );
+      }
+
+      if (typeof Cesium !== "undefined") {
+        startup(Cesium);
+      } else if (typeof require === "function") {
+        require(["Cesium", "ThirdParty/knockout-3.5.1"], startup);
+      }
+    </script>
+  </body>
+</html>
