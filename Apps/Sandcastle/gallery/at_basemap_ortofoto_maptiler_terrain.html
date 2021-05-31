@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"
+    />
+    <meta
+      name="description"
+      content="Use Viewer to start building new applications or easily embed Cesium into existing applications."
+    />
+    <meta name="cesium-sandcastle-labels" content="Beginner, Showcases" />
+    <title>Cesium Demo</title>
+    <script type="text/javascript" src="../Sandcastle-header.js"></script>
+    <script
+      type="text/javascript"
+      src="../../../Build/CesiumUnminified/Cesium.js"
+      nomodule
+    ></script>
+    <script type="module" src="../load-cesium-es6.js"></script>
+  </head>
+  <body
+    class="sandcastle-loading"
+    data-sandcastle-bucket="bucket-requirejs.html"
+  >
+    <style>
+      @import url(../templates/bucket.css);
+    </style>
+    <div id="cesiumContainer" class="fullSize"></div>
+    <div id="loadingOverlay">
+      <h1>Loading...</h1>
+    </div>
+    <div id="toolbar"></div>
+    <script id="cesium_sandcastle_script">
+      function startup(Cesium) {
+        "use strict";
+        //Sandcastle_Begin
+        //sample code to paste into https://cesiumjs.org/Cesium/Build/Apps/Sandcastle/?src=Imagery%20Layers.html&label=All
+        var imageryViewModels = [];
+        imageryViewModels.push(
+          new Cesium.ProviderViewModel({
+            name: "ESRI\u00adWorld\u00adImagery",
+            //iconUrl : wp_plugin_url.concat('lftgly/Cesium/Widgets/Images/ImageryProviders/esriWorldImagery.png'),
+            iconUrl:
+              "https://www.arcgis.com/sharing/rest/content/items/10df2279f9684e4a9f6a7f08febac2a9/info/thumbnail/ago_downloaded.jpg",
+            tooltip:
+              "World Imagery provides one meter or better satellite and aerial imagery in many parts of the world.\nhttp://www.esri.com",
+            creationFunction: function () {
+              return new Cesium.ArcGisMapServerImageryProvider({
+                url:
+                  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+              });
+            },
+          })
+        );
+        imageryViewModels.push(
+          new Cesium.ProviderViewModel({
+            name: "Austrian\u00adOpenGovernmentData\u00adBasemap",
+            iconUrl:
+              "http://www.geoland.at/assets/images/IndexGrid/basemap_hover_en.png",
+            tooltip:
+              "Austrian OGD Basemap.\nhttps://www.basemap.at/index_en.html",
+            creationFunction: function () {
+              /** www.basemap.at/wmts/1.0.0/WMTSCapabilities.xml
+               * WMTS Server:	https://maps.wien.gv.at/basemap
+               * maximumLevel 1:533 = 20,
+               * Layer name:	geolandbasemap
+               * "Geoland Basemap" default base map, , image/png
+               * Layer name:	bmapgrau
+               * "Geoland Basemap Grau" includes topographic contours, image/png
+               * Layer name:	bmaporthofoto30cm
+               * "Geoland Basemap Orthofoto" = orthophoto base map, image/jpeg
+               * Layer name:	bmapoverlay
+               * "Geoland Basemap Overlay" = labels, image/png	*/
+              return new Cesium.WebMapTileServiceImageryProvider({
+                url:
+                  "https://maps1.wien.gv.at/basemap/bmaporthofoto30cm/{Style}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.jpeg",
+                layer: "bmaporthofoto30cm",
+                style: "normal",
+                format: "image/jpeg",
+                tileMatrixSetID: "google3857",
+                maximumLevel: 20,
+                credit: "Basemap.AT",
+              });
+            },
+          })
+        );
+        console.log(
+          "...There are now " +
+            imageryViewModels.length +
+            " imageryProvider viewModels to choose in the BaseMapPicker..."
+        );
+        for (var i = 0; i < imageryViewModels.length; i++) {
+          //20170704; loop thru and list each
+          console.log(
+            "the NAME of viewModel [" + i + "] " + imageryViewModels[i].name
+          );
+        }
+
+        var viewer = new Cesium.Viewer("cesiumContainer", {
+          baseLayerPicker: true,
+          //if baseLayerPicker:false, then viewer uses options .imageryProvider & .terrainProvider,
+          //if baseLayerPicker:true then viewer uses options .selectedImageryProviderViewModel, .imageryProviderViewModels,	.selectedImageryProviderViewModel, .imageryProviderViewModels
+          selectedImageryProviderViewModel: imageryViewModels[0], //[0] is ESRI world imagery, [1] is USA Topo, [2] is PAGIS base map
+          imageryProviderViewModels: imageryViewModels,
+          //	selectedTerrainProviderViewModel : terrainViewModels[0],	//[0] is 3D STK terrain, [1] is the WGS84 ellipsoid sphere surface
+          //	terrainProviderViewModels : terrainViewModels,
+          animation: true,
+          timeline: true,
+          fullscreenButton: true,
+          fullscreenElement: "cesiumContainer", //divContainer,
+          homeButton: true,
+          navigationHelpButton: true,
+          infoBox: true,
+          selectionIndicator: true,
+          sceneModePicker: true,
+          scene3DOnly: false,
+          sceneMode: Cesium.SceneMode.SCENE3D,
+        });
+
+        viewer.terrainProvider = new Cesium.CesiumTerrainProvider({
+          url:
+            "https://api.maptiler.com/tiles/terrain-quantized-mesh/?key=yRxU9pVJBWg9qynruk8Y", // get your own key at https://cloud.maptiler.com/
+        });
+
+        viewer.scene.camera.flyTo({
+          //Innsbuck, AU, Camera position: (11.39778, 47.22998, 10000.0 meters)
+          //Camera Heading, Pitch, Roll (radians): 0.0, -1.393, 0.0
+          //St Anton, AU, Camera position: (10.27997, 47.10733, 2945.0142443629675 meters)
+          //Camera Heading, Pitch, Roll (radians): 5.697243737031187, -0.43921048291151, 6.2811357739436815
+          destination: Cesium.Cartesian3.fromDegrees(
+            10.27997,
+            47.10733,
+            2945.0
+          ),
+          maximumHeight: 14000,
+          orientation: {
+            heading: 5.6972,
+            pitch: -0.4392,
+            roll: 0.0,
+          },
+        });
+        //https://cesiumjs.org/Cesium/Build/Apps/Sandcastle/?src=Hello%20World.html&label=Showcases&gist=8ab582a2fa43b80db6eff913c0c179e0
+        //Sandcastle_End
+        Sandcastle.finishedLoading();
+      }
+      if (typeof Cesium !== "undefined") {
+        window.startupCalled = true;
+        startup(Cesium);
+      }
+    </script>
+  </body>
+</html>
