@@ -543,6 +543,19 @@
                   var entity = entities[i];
                   console.log(entity);
               }
+              // if ((entities.length == 1) && !viewer.trackedEntity && !viewer.selectedEntity) {
+              //     viewer.selectedEntity = entities[0];
+              //     viewer.trackedEntity = entities[0];
+              //     flightOrientation = new  Cesium.VelocityOrientationProperty(
+              //         viewer.selectedEntity.position
+              //     );
+              //     velocityVectorProperty = new  Cesium.VelocityVectorProperty(
+              //         viewer.selectedEntity.position,
+              //         false
+              //     );
+              //     console.log("track and select: ", entities[0]);
+              // }
+
           });
 
           var handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
@@ -586,7 +599,7 @@
                       clock.currentTime
                   );
                   if (bs != burnerstate) {
-                      console.log("burner change to: ", bs);
+                      // console.log("burner change to: ", bs);
                       burnerstate = bs;
                       burnerled.className = burnerstate ? "on" : "off";
                   }
