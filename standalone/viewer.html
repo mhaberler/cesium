@@ -17,7 +17,6 @@
     <!-- <base href="https://stiwoll.mah.priv.at/sandbox/cesium/Apps/Sandcastle/gallery/"> -->
     <base href="../Apps/Sandcastle/gallery/">
 
-
     <script type="text/javascript" src="../Sandcastle-header.js"></script>
     <script
       type="text/javascript"
@@ -25,7 +24,9 @@
       nomodule
       ></script>
     <script type="module" src="../load-cesium-es6.js"></script>
+
     <script src="../../..//node_modules/canvas-gauges/gauge.min.js"></script>
+    <link rel="stylesheet" href="../../../standalone/mahViewer/CesiumViewer.css" media="screen" />
 
   </head>
 
@@ -33,44 +34,335 @@
     class="sandcastle-loading"
     data-sandcastle-bucket="bucket-requirejs.html"
     >
+
     <style>
       @import url(../templates/bucket.css);
+      #toolbar {
+          background: rgba(42, 42, 42, 0.9);
+          padding: 4px;
+          border-radius: 4px;
+      }
+      #toolbar input {
+          vertical-align: middle;
+          padding-top: 2px;
+          padding-bottom: 2px;
+      }
     </style>
+
     <div id="cesiumContainer" class="fullSize"></div>
-    <div id="loadingOverlay"><h1>Loading...</h1></div>
-    <div id="toolbar">
-      <h2>Flight Data</h2>
-      <div class="nowrap">
-        <canvas id="compass"></canvas>
+
+    <div id="toolbar" >
+        <h2>Flight Data</h2>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <canvas id="compass"></canvas>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <canvas id="altitude"></canvas>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <canvas id="speed"></canvas>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <canvas id="temperature"></canvas>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div class="nowrap">
-        <canvas id="altitude"></canvas>
-      </div>
-      <div class="nowrap">
-        <canvas id="speed"></canvas>
-      </div>
-      <div class="nowrap">
-        <canvas id="temperature"></canvas>
-      </div>
-    </div>
+      <div id="loadingIndicator" class="loadingIndicator"></div>
 
-    <script id="cesium_sandcastle_script">
-      function startup(Cesium) {
-          "use strict";
-          Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
+      <script id="cesium_sandcastle_script"  type="module">
 
-          //Sandcastle_Begin
-          var viewer = new Cesium.Viewer("cesiumContainer");
+        function startup(Cesium) {
+            "use strict";
 
 
+            //Sandcastle_Begin
 
-          //Sandcastle_End
-          Sandcastle.finishedLoading();
-      }
-      if (typeof Cesium !== "undefined") {
-          window.startupCalled = true;
-          startup(Cesium);
-      }
-    </script>
+
+            Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI4Y2IxNmUzYS1jMjM2LTRiMDQtODc5My1lNzY0NWVmMmIxZGYiLCJpZCI6MTQ0MjAsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJpYXQiOjE1NjY4OTU3MzJ9.eNbRjekmhTuTUGnVnzPInXJO_1deoWNMcDIEB25fg8M";
+
+            var endUserOptions = Cesium.queryToObject(window.location.search.substring(1));
+
+            var imageryProvider;
+            if (Cesium.defined(endUserOptions.tmsImageryUrl)) {
+                imageryProvider = new TileMapServiceImageryProvider({
+                    url: endUserOptions.tmsImageryUrl,
+                });
+            }
+
+            var loadingIndicator = document.getElementById("loadingIndicator");
+            var viewer;
+            try {
+                var hasBaseLayerPicker = !Cesium.defined(imageryProvider);
+                viewer = new Cesium.Viewer("cesiumContainer", {
+                    imageryProvider: imageryProvider,
+                    baseLayerPicker: hasBaseLayerPicker,
+                    scene3DOnly: endUserOptions.scene3DOnly,
+                    requestRenderMode: true,
+                    geocoder: false,
+                    homeButton: false,
+                    vrButton: true,
+                    shouldAnimate:  (Cesium.defined(endUserOptions.autostart)) ? true : false
+                });
+
+                if (hasBaseLayerPicker) {
+                    var viewModel = viewer.baseLayerPicker.viewModel;
+                    viewModel.selectedTerrain = viewModel.terrainProviderViewModels[1];
+                } else {
+                    viewer.terrainProvider = Cesium.createWorldTerrain({
+                        requestWaterMask: true,
+                        requestVertexNormals: true,
+                    });
+                }
+            } catch (exception) {
+                loadingIndicator.style.display = "none";
+                var message = Cesium.formatError(exception);
+                console.error(message);
+                if (!document.querySelector(".cesium-widget-errorPanel")) {
+                    //eslint-disable-next-line no-alert
+                    window.alert(message);
+                }
+                return;
+            }
+
+            viewer.extend(Cesium.viewerDragDropMixin);
+            if (endUserOptions.inspector) {
+                viewer.extend(Cesium.viewerCesiumInspectorMixin);
+            }
+
+            var showLoadError = function (name, error) {
+                var title = "An error occurred while loading the file: " + name;
+                var message =
+                    "An error occurred while loading the file, which may indicate that it is invalid.  A detailed error report is below:";
+                viewer.cesiumWidget.showErrorPanel(title, message, error);
+            };
+
+            viewer.dropError.addEventListener(function (viewerArg, name, error) {
+                showLoadError(name, error);
+            });
+
+            var scene = viewer.scene;
+            var context = scene.context;
+            if (endUserOptions.debug) {
+                context.validateShaderProgram = true;
+                context.validateFramebuffer = true;
+                context.logShaderCompilation = true;
+                context.throwOnWebGLError = true;
+            }
+
+
+            var view = endUserOptions.view;
+            var source = endUserOptions.source;
+            if (Cesium.defined(source)) {
+                var sourceType = endUserOptions.sourceType;
+                if (!Cesium.defined(sourceType)) {
+                    // autodetect using file extension if not specified
+                    if (/\.czml$/i.test(source)) {
+                        sourceType = "czml";
+                    } else if (
+                        /\.geojson$/i.test(source) ||
+                            /\.json$/i.test(source) ||
+                            /\.topojson$/i.test(source)
+                    ) {
+                        sourceType = "geojson";
+                    } else if (/\.kml$/i.test(source) || /\.kmz$/i.test(source)) {
+                        sourceType = "kml";
+                    }
+                }
+
+                var loadPromise;
+                if (sourceType === "czml") {
+                    loadPromise = Cesium.CzmlDataSource.load(source);
+                } else if (sourceType === "geojson") {
+                    loadPromise = Cesium.GeoJsonDataSource.load(source);
+                } else if (sourceType === "kml") {
+                    loadPromise = Cesium.KmlDataSource.load(source, {
+                        camera: scene.camera,
+                        canvas: scene.canvas,
+                    });
+                } else {
+                    showLoadError(source, "Unknown format.");
+                }
+
+                var viewFrom = endUserOptions.viewFrom;
+                if (Cesium.defined(viewFrom)) {
+                    //viewFrom=angle (deg), horizontal distance and vertical distance
+                    var splitQuery = viewFrom.split(/[ ,]+/);
+                    if (splitQuery.length == 3) {
+                        var angle = !isNaN(+splitQuery[0]) ? Cesium.Math.toRadians(+splitQuery[0]) : 0.0;
+                        var hDistance = !isNaN(+splitQuery[1]) ?  +splitQuery[1] : 100.0;
+                        var vDistance = !isNaN(+splitQuery[2]) ?  +splitQuery[2] : 50.0;
+                        var viewFromC3 = new Cesium.Cartesian3(-Math.sin(angle) * hDistance, -Math.cos(angle) * hDistance, vDistance);
+                        console.log("custom viewFrom:", viewFromC3);
+                    }
+                }
+
+                if (Cesium.defined(loadPromise)) {
+                    viewer.dataSources
+                        .add(loadPromise)
+                        .then(function (dataSource) {
+                            var lookAt = endUserOptions.lookAt;
+                            if (Cesium.defined(lookAt)) {
+                                var entity = dataSource.entities.getById(lookAt);
+                                if (Cesium.defined(entity)) {
+                                    if (Cesium.defined(viewFromC3)) {
+                                        entity.viewFrom = viewFromC3;
+                                        console.log("----viewFrom:", entity.viewFrom);
+
+                                    }
+                                    viewer.trackedEntity = entity;
+                                } else {
+                                    var error =
+                                        'No entity with id "' +
+                                        lookAt +
+                                        '" exists in the provided data source.';
+                                    showLoadError(source, error);
+                                }
+                            } else if (!Cesium.defined(view) && endUserOptions.flyTo !== "false") {
+                                viewer.flyTo(dataSource);
+                            }
+                        })
+                        .otherwise(function (error) {
+                            showLoadError(source, error);
+                        });
+                }
+            }
+            //---
+            var source2 = endUserOptions.source2;
+            var sourceType2;
+            if (Cesium.defined(source2)) {
+                // autodetect using file extension if not specified
+                if (/\.czml$/i.test(source2)) {
+                    sourceType2 = "czml";
+                } else if (
+                    /\.geojson$/i.test(source2) ||
+                        /\.json$/i.test(source2) ||
+                        /\.topojson$/i.test(source2)
+                ) {
+                    sourceType2 = "geojson";
+                } else if (/\.kml$/i.test(source2) || /\.kmz$/i.test(source2)) {
+                    sourceType2 = "kml";
+                }
+
+                var loadPromise2;
+                if (sourceType2 === "czml") {
+                    loadPromise2 = Cesium.CzmlDataSource.load(source2);
+                } else if (sourceType2 === "geojson") {
+                    loadPromise2 = Cesium.GeoJsonDataSource.load(source2);
+                } else if (sourceType2 === "kml") {
+                    loadPromise2 = Cesium.KmlDataSource.load(source2, {
+                        camera: scene.camera,
+                        canvas: scene.canvas,
+                    });
+                } else {
+                    showLoadError(source2, "Unknown format.");
+                }
+
+                if (Cesium.defined(loadPromise2)) {
+                    viewer.dataSources.add(loadPromise2);
+                }
+            }
+
+            //..
+            if (endUserOptions.stats) {
+                scene.debugShowFramesPerSecond = true;
+            }
+
+            var theme = endUserOptions.theme;
+            if (Cesium.defined(theme)) {
+                if (endUserOptions.theme === "lighter") {
+                    document.body.classList.add("cesium-lighter");
+                    viewer.animation.applyThemeChanges();
+                } else {
+                    var error = "Unknown theme: " + theme;
+                    viewer.cesiumWidget.showErrorPanel(error, "");
+                }
+            }
+
+            if (Cesium.defined(view)) {
+                var splitQuery = view.split(/[ ,]+/);
+                if (splitQuery.length > 1) {
+                    var longitude = !isNaN(+splitQuery[0]) ? +splitQuery[0] : 0.0;
+                    var latitude = !isNaN(+splitQuery[1]) ? +splitQuery[1] : 0.0;
+                    var height =
+                        splitQuery.length > 2 && !isNaN(+splitQuery[2])
+                        ? +splitQuery[2]
+                        : 300.0;
+                    var heading =
+                        splitQuery.length > 3 && !isNaN(+splitQuery[3])
+                        ? Cesium.Math.toRadians(+splitQuery[3])
+                        : undefined;
+                    var pitch =
+                        splitQuery.length > 4 && !isNaN(+splitQuery[4])
+                        ? Cesium.Math.toRadians(+splitQuery[4])
+                        : undefined;
+                    var roll =
+                        splitQuery.length > 5 && !isNaN(+splitQuery[5])
+                        ? Cesium.Math.toRadians(+splitQuery[5])
+                        : undefined;
+
+                    viewer.camera.setView({
+                        destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, height),
+                        orientation: {
+                            heading: heading,
+                            pitch: pitch,
+                            roll: roll,
+                        },
+                    });
+                }
+            }
+
+            var camera = viewer.camera;
+            function saveCamera() {
+                var position = camera.positionCartographic;
+                var hpr = "";
+                if (Cesium.defined(camera.heading)) {
+                    hpr =
+                        "," +
+                        Cesium.Math.toDegrees(camera.heading) +
+                        "," +
+                        Cesium.Math.toDegrees(camera.pitch) +
+                        "," +
+                        Cesium.Math.toDegrees(camera.roll);
+                }
+                endUserOptions.view =
+                    Cesium.Math.toDegrees(position.longitude) +
+                    "," +
+                    Cesium.Math.toDegrees(position.latitude) +
+                    "," +
+                    position.height +
+                    hpr;
+                history.replaceState(undefined, "", "?" + objectToQuery(endUserOptions));
+            }
+
+            var timeout;
+            if (endUserOptions.saveCamera !== "false") {
+                camera.changed.addEventListener(function () {
+                    window.clearTimeout(timeout);
+                    timeout = window.setTimeout(saveCamera, 1000);
+                });
+            }
+
+            loadingIndicator.style.display = "none";
+
+
+            //Sandcastle_End
+            Sandcastle.finishedLoading();
+        }
+        if (typeof Cesium !== "undefined") {
+            window.startupCalled = true;
+            startup(Cesium);
+        }
+      </script>
   </body>
 </html>
