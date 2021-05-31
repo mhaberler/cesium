@@ -17,13 +17,28 @@
     <!-- <base href="https://stiwoll.mah.priv.at/sandbox/cesium/Apps/Sandcastle/gallery/"> -->
     <base href="../Apps/Sandcastle/gallery/">
 
-    <script type="text/javascript" src="../Sandcastle-header.js"></script>
-    <script
-      type="text/javascript"
-      src="../../../Build/CesiumUnminified/Cesium.js"
-      nomodule
-      ></script>
-    <script type="module" src="../load-cesium-es6.js"></script>
+    <!-- <script type="text/javascript" src="../Sandcastle-header.js"></script> -->
+    <!-- <script -->
+    <!--   type="text/javascript" -->
+    <!--   src="../../../Build/CesiumUnminified/Cesium.js" -->
+    <!--   nomodule -->
+    <!--   ></script> -->
+    <script id="cesium_sandcastle_script"  type="module">
+
+// This file loads the unbuilt ES6 version of Cesium
+// into the global scope during local developmnet
+window.CESIUM_BASE_URL = "../../../Source/";
+import * as Cesium from "../../../Source/Cesium.js";
+window.Cesium = Cesium;
+
+// Since ES6 modules have no guaranteed load order,
+// only call startup if it's already defined but hasn't been called yet
+if (!window.startupCalled && typeof window.startup === "function") {
+  window.startup(Cesium);
+}
+
+    </script>
+    <!-- <script type="module" src="../load-cesium-es6.js"></script> -->
 
     <script src="../../..//node_modules/canvas-gauges/gauge.min.js"></script>
     <link rel="stylesheet" href="../../../standalone/mahViewer/CesiumViewer.css" media="screen" />
@@ -635,7 +650,7 @@
           }
 
           //Sandcastle_End
-          Sandcastle.finishedLoading();
+          // Sandcastle.finishedLoading();
       }
       if (typeof Cesium !== "undefined") {
           window.startupCalled = true;
