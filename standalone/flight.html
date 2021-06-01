@@ -12,15 +12,14 @@
       content="Balloon Flight Animation."
       />
     <meta name="cesium-sandcastle-labels" content="Beginner, Showcases" />
+
     <title>Balloonride</title>
 
-    <script src="../Build/Cesium/Cesium.js"  ></script>
-    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script>
 
-    <script src="../node_modules/canvas-gauges/gauge.min.js"></script>
-    <link rel="stylesheet" href="mahViewer/CesiumViewer.css" media="screen" />
+    <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.81/Build/Cesium/Widgets/widgets.css">
 
-    <link rel="stylesheet" href="assets/css/bucketRaw.css" media="screen" />
+    <link rel="stylesheet" href="assets/css/CesiumViewer.css" media="screen" />
     <link rel="stylesheet" href="assets/css/burner.css"  />
 
   </head>
@@ -29,7 +28,6 @@
      <div id="cesiumContainer" class="fullSize" style="z-index: 0;"></div>
 
     <div id="toolbar" >
-      <!-- <h2>Flight</h2> -->
       <table>
         <tbody>
           <tr>
@@ -62,7 +60,7 @@
     </div>
     <div id="loadingIndicator" class="loadingIndicator"></div>
 
-    <script src="assets/js/flight.js"  type="module">
+    <script src="assets/js/flight.js" type="module">
     </script>
   </body>
 </html>
