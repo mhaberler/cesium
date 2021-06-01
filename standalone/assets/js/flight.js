@@ -1,4 +1,6 @@
 
+// https://github.com/CesiumGS/cesium/issues/8327
+// needed for stuff from Source/Assets and Source/Widgets
 window.CESIUM_BASE_URL = "../../../Source/";
 
 import {
@@ -32,10 +34,10 @@ import {
     viewerDragDropMixin,
 
 // the next 2 work:
-} from "https://cesium.com/downloads/cesiumjs/releases/1.81/Source/Cesium.js"
-//"../../../Source/Cesium.js";
+} from "../../../Source/Cesium.js";
+// "https://cesium.com/downloads/cesiumjs/releases/1.81/Source/Cesium.js"
 
-// does not work
+// does not work - node syntax
 // "../../../Build/Cesium/Cesium.js";
 
 
